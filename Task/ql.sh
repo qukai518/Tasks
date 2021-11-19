@@ -13,7 +13,7 @@ echo -e "\e[36m
        ▀                        ▀████▀▀                                 ▀████▀▀
 \e[0m\n"
 
-DOCKER_IMG_NAME="shufflewzc/qinglong"
+DOCKER_IMG_NAME="buqian/qinglong"
 JD_PATH=""
 SHELL_FOLDER=$(pwd)
 CONTAINER_NAME=""
@@ -80,7 +80,7 @@ docker_install() {
 }
 
 docker_install
-warn "降低学习成本，小白回车到底，一路默认选择"
+warn "CITY仓库一键安装配置，小白回车到底，一路默认选择"
 # 配置文件保存目录
 echo -n -e "\e[33m一、请输入配置文件保存的绝对路径（示例：/root)，回车默认为当前目录:\e[0m"
 read jd_path
@@ -357,11 +357,11 @@ if [ "$access" != "2" ]; then
     if [ "$(grep -c "token" $CONFIG_PATH/auth.json)" != 0 ]; then
         log "7.开始安装或重装 Ninja"
         if [ "$INSTALL_NINJA" = true ]; then
-            docker exec -it $CONTAINER_NAME bash -c "cd /ql;ps -ef|grep ninja|grep -v grep|awk '{print $1}'|xargs kill -9;rm -rf /ql/ninja;git clone https://ghproxy.com/https://github.com/shufflewzc/Waikiki_ninja.git /ql/ninja;cd /ql/ninja/backend;pnpm install;cp .env.example .env;cp sendNotify.js /ql/scripts/sendNotify.js;sed -i \"s/ALLOW_NUM=40/ALLOW_NUM=100/\" /ql/ninja/backend/.env;pm2 start"
+            docker exec -it $CONTAINER_NAME bash -c "cd /ql;ps -ef|grep ninja|grep -v grep|awk '{print $1}'|xargs kill -9;rm -rf /ql/ninja;git clone https://ghproxy.com/https://github.com/buqian123/Waikiki_ninja.git /ql/ninja;cd /ql/ninja/backend;pnpm install;cp .env.example .env;cp sendNotify.js /ql/scripts/sendNotify.js;sed -i \"s/ALLOW_NUM=40/ALLOW_NUM=100/\" /ql/ninja/backend/.env;pm2 start"
             docker exec -it $CONTAINER_NAME bash -c "sed -i \"s/ALLOW_NUM=40/ALLOW_NUM=100/\" /ql/ninja/backend/.env && cd /ql/ninja/backend && pm2 start"
         fi
         log "8.开始青龙内部配置"
-        docker exec -it $CONTAINER_NAME bash -c "$(curl -fsSL https://ghproxy.com/https://github.com/shufflewzc/VIP/blob/main/Scripts/sh/1customCDN.sh)"
+        docker exec -it $CONTAINER_NAME bash -c "$(curl -fsSL https://ghproxy.com/https://github.com/buqian123/kill/Task/1customCDN.sh)"
     else
         warn "8.未检测到 token，取消内部配置"
     fi
