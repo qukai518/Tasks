@@ -70,7 +70,7 @@ docker exec -it 容器名 bash -c "$(curl -fsSL https://ghproxy.com/https://raw.
 
 ```bash
 
-docker exec -it qinglong bash -c "$(curl -fsSL https://raw.githubusercontents.com/buqian123/Tasks/main/QLOneKeyDependency.sh | sh)"
+docker exec -it 容器名 bash -c "$(curl -fsSL https://raw.githubusercontents.com/buqian123/Tasks/main/QLOneKeyDependency.sh | sh)"
 
 ```
 
