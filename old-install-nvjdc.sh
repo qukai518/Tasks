@@ -157,18 +157,16 @@ install_nvjdc(){
 echo -e "${red}开始进行安装,请根据命令提示操作${plain}"
 if [ ! -d "/root/nvjdc/.local-chromium/Linux-884014" ]; then
 mkdir nvjdc && cd nvjdc
-echo -e "${green}正在拉取chromium-browser-snapshots等依赖,体积100多M，请耐心等待下一步命令提示···${plain}"
-git clone https://ghproxy.com/https://github.com/buqian123/nvjdcdocker.git /root/nvjdc
+echo -e "${green}正在拉取chromium-browser-snapshots,体积100多M，请耐心等待下一步命令提示···${plain}"
 mkdir -p  .local-chromium/Linux-884014 && cd .local-chromium/Linux-884014
 wget http://npm.taobao.org/mirrors/chromium-browser-snapshots/Linux_x64/884014/chrome-linux.zip > /dev/null 2>&1 
 unzip chrome-linux.zip > /dev/null 2>&1 
 rm  -f chrome-linux.zip > /dev/null 2>&1 
 fi
-mkdir /root/nvjdc/Config && cd /root/nvjdc/Config
-wget -O Config.json   https://ghproxy.com/https://raw.githubusercontent.com/buqian123/nvjdc/main/Config.json
+cd /root/nvjdc
 read -p "请输入青龙服务器在web页面中显示的名称: " QLName && printf "\n"
 read -p "请输入nvjdc面板标题: " title && printf "\n"
-read -p "请输入nvjdc面板希望使用的端口号: " portinfo && printf "\n"
+read -p "请输入nvjdc面板希望使用的端口号: " jdcport && printf "\n"
 read -p "请输入XDD面板地址，格式如http://192.168.2.2:6666/api/login/smslogin  如不启用直接回车: " XDDurl && printf "\n"
 read -p "请输入XDD面板Token（如不启用直接回车）: " XDDToken && printf "\n"
 read -p "nvjdc是否对接青龙，输入y或者n " jdcqinglong && printf "\n"
@@ -176,7 +174,7 @@ read -p "nvjdc是否对接青龙，输入y或者n " jdcqinglong && printf "\n"
 read -p "请输入青龙OpenApi Client ID: " ClientID && printf "\n"
 read -p "请输入青龙OpenApi Client Secret: " ClientSecret && printf "\n"
 read -p "请输入青龙服务器的url地址（类似http://192.168.2.2:5700）: " QLurl && printf "\n"
-cat > /root/nvjdc/Config/Config.json << EOF
+cat > /root/nvjdc/Config.json << EOF
 {
   ///浏览器最多几个网页
   "MaxTab": "4",
@@ -210,7 +208,7 @@ cat > /root/nvjdc/Config/Config.json << EOF
 }
 EOF
 else
-cat > /root/nvjdc/Config/Config.json << EOF
+cat > /root/nvjdc/Config.json << EOF
 {
   ///浏览器最多几个网页
   "MaxTab": "4",
@@ -230,9 +228,9 @@ EOF
 fi
 read -p "请输入自动滑块次数 直接回车默认5次后手动滑块 输入0为默认手动滑块: " AutoCaptcha && printf "\n"
 	if [ ! -n "$AutoCaptcha" ];then
-    sed -i "5a \        \"AutoCaptchaCount\": \"5\"," /root/nvjdc/Config/Config.json
+    sed -i "5a \        \"AutoCaptchaCount\": \"5\"," /root/nvjdc/Config.json
 else
-    sed -i "5a \        \"AutoCaptchaCount\": \"${AutoCaptcha}\"," /root/nvjdc/Config/Config.json
+    sed -i "5a \        \"AutoCaptchaCount\": \"${AutoCaptcha}\"," /root/nvjdc/Config.json
 fi
 read -p "请输入要安装的nvjdc版本，如安装最新版直接回车: " version && printf "\n"
 	if [ ! -n "${version}" ];then
@@ -255,50 +253,45 @@ docker pull buqian/nvjdc:${version1}
 
 
 #创建并启动nvjdc容器
-cd /root/nvjdc
 echo -e "${green}开始创建nvjdc容器${plain}"
-docker run   --name nvjdc -p ${portinfo}:80 -d  -v  "$(pwd)":/app \
--v /etc/localtime:/etc/localtime:ro \
+docker run   --name nvjdc -p ${jdcport}:80 -d  -v  "$(pwd)"/Config.json:/app/Config/Config.json:ro \
+-v "$(pwd)"/.local-chromium:/app/.local-chromium  \
 -it --privileged=true  buqian/nvjdc:${version1}
 docker update --restart=always nvjdc
 
 baseip=$(curl -s ipip.ooo)  > /dev/null
 
-echo -e "${green}安装完毕,面板访问地址：http://${baseip}:${portinfo}${plain}"
+echo -e "${green}安装完毕,面板访问地址：http://${baseip}:${jdcport}${plain}"
 }
 
 update_nvjdc(){
-mv /root/nvjdc /root/nvjdcdb
-git clone https://ghproxy.com/https://github.com/buqian123/nvjdcdocker.git /root/nvjdc
-cd /root/nvjdc &&  mkdir -p  Config &&  mv /root/nvjdcdb/Config.json /root/nvjdc/Config/Config.json
-cd /root/nvjdc &&    mv /root/nvjdcdb/.local-chromium /root/nvjdc/.local-chromium
-cd /root/nvjdc
+  cd /root/nvjdc
 portinfo=$(docker port nvjdc | head -1  | sed 's/ //g' | sed 's/80\/tcp->0.0.0.0://g')
-condition=$(cat /root/nvjdc/Config/Config.json | grep -o '"XDDurl": .*' | awk -F":" '{print $1}' | sed 's/\"//g')
-AutoCaptcha1=$(cat /root/nvjdc/Config/Config.json | grep -o '"AutoCaptchaCount": .*' | awk -F":" '{print $1}' | sed 's/\"//g')
+condition=$(cat /root/nvjdc/Config.json | grep -o '"XDDurl": .*' | awk -F":" '{print $1}' | sed 's/\"//g')
+AutoCaptcha1=$(cat /root/nvjdc/Config.json | grep -o '"AutoCaptchaCount": .*' | awk -F":" '{print $1}' | sed 's/\"//g')
 if [ ! -n "$condition" ]; then
 read -p "是否要对接XDD，输入y或者n: " XDD && printf "\n"
 if [[ "$XDD" == "y" ]];then
 read -p "请输入XDD面板地址，格式如http://192.168.2.2:6666/api/login/smslogin : " XDDurl && printf "\n"
 read -p "请输入XDD面板Token: " XDDToken && printf "\n"
-sed -i "7a \          \"XDDurl\": \"${XDDurl}\"," /root/nvjdc/Config/Config.json
-sed -i "7a \        \"XDDToken\": \"${XDDToken}\"," /root/nvjdc/Config/Config.json
+sed -i "7a \          \"XDDurl\": \"${XDDurl}\"," /root/nvjdc/Config.json
+sed -i "7a \        \"XDDToken\": \"${XDDToken}\"," /root/nvjdc/Config.json
 fi
 fi
 
 if [ ! -n "$AutoCaptcha1" ];then
 	read -p "请输入自动滑块次数 直接回车默认5次后手动滑块 输入0为默认手动滑块: " AutoCaptcha && printf "\n"
 	if [ ! -n "$AutoCaptcha" ];then
-    sed -i "5a \        \"AutoCaptchaCount\": \"5\"," /root/nvjdc/Config/Config.json
+    sed -i "5a \        \"AutoCaptchaCount\": \"5\"," /root/nvjdc/Config.json
 else
-    sed -i "5a \        \"AutoCaptchaCount\": \"${AutoCaptcha}\"," /root/nvjdc/Config/Config.json
+    sed -i "5a \        \"AutoCaptchaCount\": \"${AutoCaptcha}\"," /root/nvjdc/Config.json
 fi
 fi
 baseip=$(curl -s ipip.ooo)  > /dev/null
 docker rm -f nvjdc
 docker pull buqian/nvjdc:latest
-docker run   --name nvjdc -p ${portinfo}:80 -d  -v  "$(pwd)":/app \
--v /etc/localtime:/etc/localtime:ro \
+docker run   --name nvjdc -p ${portinfo}:80 -d  -v  "$(pwd)"/Config.json:/app/Config/Config.json:ro \
+-v "$(pwd)"/.local-chromium:/app/.local-chromium  \
 -it --privileged=true  buqian/nvjdc:latest
 docker update --restart=always nvjdc
 echo -e "${green}nvjdc更新完毕，脚本自动退出。${plain}"
@@ -316,7 +309,7 @@ menu() {
   echo -e "\
 ${green}0.${plain} 退出脚本
 ${green}1.${plain} 安装nvjdc
-${green}2.${plain} 1.2升级1.4
+${green}2.${plain} 升级nvjdc
 ${green}3.${plain} 卸载nvjdc
 "
 get_system_info
