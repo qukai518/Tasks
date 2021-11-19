@@ -32,8 +32,8 @@ Ninja="down" ##up为更新，on为启动，down为不运行
 #------ 编号区 ------#
 :<<\EOF
 一、集成仓库（Collected Repositories)
-1-buqian123（自用）
-2-buqian123（自用）
+1-Yun-City
+2-buqian123-faker3（自用）
 二、其他仓库（Other Repositories）
 1-青蛙库（开卡）
 EOF
