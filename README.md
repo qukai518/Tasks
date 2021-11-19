@@ -1,7 +1,7 @@
 
 
 【集合仓库拉取命令】
-``` 
+``` bash
 ql repo https://ghproxy.com/https://github.com/buqian123/faker3.git "jd_|jx_|gua_|jddj_|getJDCookie" "activity|backUp" "^jd[^_]|USER|function|utils|sendnotify|ZooFaker_Necklace.js|JDJRValidator_|sign_graphics_validate|ql"
 ```
 
@@ -9,14 +9,14 @@ ql repo https://ghproxy.com/https://github.com/buqian123/faker3.git "jd_|jx_|gua
 
 【安装docker、安装2.9.3青龙、配置本仓库，与青蛙开卡仓库】
 
-```
+```bash
 wget -q  https://raw.githubusercontents.com/buqian123/Tasks/main/ql.sh -O ql.sh && bash ql.sh
 ```
 
 
 【已安装青龙的用户一键配置代码 配置Faker3仓库助力】
 
-```jsx
+```bash
 docker exec -it qinglong bash -c "$(curl -fsSL  https://raw.githubusercontents.com/buqian123/Tasks/main/1customCDN.sh)"
 ```
 
@@ -53,8 +53,25 @@ bash <(curl -sL  https://raw.githubusercontents.com/buqian123/Tasks/main/onekey-
  ```
 【青龙一键安装依赖】
 
+国内版：
+
+
 ```bash
-bash <(curl -sL  https://raw.githubusercontents.com/buqian123/Tasks/main/QLOneKeyDependency.sh)
+
+docker exec -it 容器名 bash -c "$(curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/QLOneKeyDependency.sh | sh)"
+
+```
+
+
+
+
+
+国外版：
+
+```bash
+
+docker exec -it qinglong bash -c "$(curl -fsSL https://raw.githubusercontents.com/buqian123/Tasks/main/QLOneKeyDependency.sh | sh)"
+
 ```
 
 ### 安装青龙需要一些的依赖
