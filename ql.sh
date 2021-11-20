@@ -71,7 +71,7 @@ docker_install() {
             exit 1
         else
             echo "安装 docker 环境..."
-            curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+            bash <(curl -sSL https://raw.githubusercontents.com/buqian123/Tasks/main/DockerInstallation.sh)
             echo "安装 docker 环境...安装完成!"
             systemctl enable docker
             systemctl start docker
