@@ -9,7 +9,7 @@ extra_shell_path=$dir_config/extra.sh
 code_shell_path=$dir_config/code.sh
 task_before_shell_path=$dir_config/task_before.sh
 bot_json=$dir_config/bot.json
-jdCookie_shell_path$dir_config/jdCookie.js
+jdCookie_shell_path=$dir_config/jdCookie.js
 
 # 控制是否执行变量
 read -p "是否执行全部操作，输入 1 即可执行全部，输入 0 则跳出，回车默认和其他可进行选择性操作，建议初次配置输入 1：" all
@@ -20,7 +20,7 @@ elif [ "${all}" = 0 ]; then
 else
     read -p "config.sh 操作（替换或下载选项为 y，不替换为 n，回车为替换）请输入：" Rconfig
     Rconfig=${Rconfig:-'y'}
-	read -p "jdCOOkie.js 操作（替换或下载选项为 y，不替换为 n，回车为替换）请输入：" RjdCookie
+	read -p "jdCookie.js 操作（替换或下载选项为 y，不替换为 n，回车为替换）请输入：" RjdCookie
     Rconfig=${RjdCookie:-'y'}
     read -p "extra.sh 操作（替换或下载选项为 a，修改设置区设置为 b，添加到定时任务为 c，立即执行一次为 d，全部不执行为 n，回车全部执行 | 示例：acd）请输入：" extra
     extra=${extra:-'abcd'}
