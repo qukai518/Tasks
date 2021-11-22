@@ -9,7 +9,7 @@ extra_shell_path=$dir_config/extra.sh
 code_shell_path=$dir_config/code.sh
 task_before_shell_path=$dir_config/task_before.sh
 bot_json=$dir_config/bot.json
-jdCookie_shell_path=$dir_config/jdCookie.js
+jdCookie_shell_path$dir_config/jdCookie.js
 
 # 控制是否执行变量
 read -p "是否执行全部操作，输入 1 即可执行全部，输入 0 则跳出，回车默认和其他可进行选择性操作，建议初次配置输入 1：" all
@@ -20,7 +20,7 @@ elif [ "${all}" = 0 ]; then
 else
     read -p "config.sh 操作（替换或下载选项为 y，不替换为 n，回车为替换）请输入：" Rconfig
     Rconfig=${Rconfig:-'y'}
-	read -p "jdCookie.js 操作（替换或下载选项为 y，不替换为 n，回车为替换）请输入：" RjdCookie
+	read -p "jdCOOkie.js 操作（替换或下载选项为 y，不替换为 n，回车为替换）请输入：" RjdCookie
     Rconfig=${RjdCookie:-'y'}
     read -p "extra.sh 操作（替换或下载选项为 a，修改设置区设置为 b，添加到定时任务为 c，立即执行一次为 d，全部不执行为 n，回车全部执行 | 示例：acd）请输入：" extra
     extra=${extra:-'abcd'}
@@ -48,7 +48,7 @@ check_url() {
 
 # 获取有效 config.sh 链接
 get_valid_config() {
-    config_list=(https://raw.githubusercontents.com/buqian123/Tasks/main/config.sample.sh https://raw.sevencdn.com/buqian123/Tasks/main/config.sample.sh https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/config.sample.sh)
+    config_list=(https://raw.githubusercontents.com/Yun-City/City/main/config/config.sample.sh https://raw.sevencdn.com/Yun-City/City/main/config/config.sample.sh https://ghproxy.com/https://raw.githubusercontent.com/Yun-City/City/main/config/config.sample.sh)
     for url in ${config_list[@]}; do
         check_url $url
         if [ $? = 0 ]; then
@@ -79,9 +79,43 @@ else
 fi
 
 
+
+# 获取有效 jdCookie.js 链接
+get_valid_jdCookie() {
+    jdCookie_list=(https://raw.githubusercontents.com/buqian123/Tasks/main/jdCookie.js https://raw.sevencdn.com/buqian123/Tasks/main/jdCookie.js https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/jdCookie.js)
+    for url in ${jdCookie_list[@]}; do
+        check_url $url
+        if [ $? = 0 ]; then
+            valid_url=$url
+            echo "使用链接 $url"
+            break
+        fi
+    done
+}
+
+# 下载 jdCookie.js
+dl_jdCookie_shell() {
+    if [ ! -a "$jdCookie_shell_path" ]; then
+        touch $jdCookie_shell_path
+    fi
+    curl -sL --connect-timeout 3 $valid_url > $jdCookie_shell_path
+    cp $jdCookie_shell_path $dir_script/jdCookie.js
+    # 判断是否下载成功
+    jdCookie_size=$(ls -l $jdCookie_shell_path | awk '{print $5}')
+    if (( $(echo "${jdCookie_size} < 100" | bc -l) )); then
+        echo "jdCookie.js 下载失败"
+        exit 0
+    fi
+}
+if [ "${RjdCookie}" = 'y' -o "${all}" = 1 ]; then
+    get_valid_jdCookie && dl_jdCookie_shell
+else
+    echo "已为您跳过下载 jdCookie.js"
+fi
+
 # 获取有效 extra.sh 链接
 get_valid_extra() {
-    extra_list=(https://raw.githubusercontents.com/buqian123/Tasks/main/extra.sh https://raw.sevencdn.com/buqian123/Tasks/main/extra.sh https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/extra.sh)
+    extra_list=(https://raw.githubusercontents.com/Yun-City/City/main/config/extra.sh https://raw.sevencdn.com/Yun-City/City/main/config/extra.sh https://ghproxy.com/https://raw.githubusercontent.com/Yun-City/City/main/config/extra.sh)
     for url in ${extra_list[@]}; do
         check_url $url
         if [ $? = 0 ]; then
@@ -158,7 +192,7 @@ fi
 
 # 获取有效 code.sh 链接
 get_valid_code() {
-    code_list=(https://raw.githubusercontents.com/buqian123/Tasks/main/code.sh https://raw.sevencdn.com/buqian123/Tasks/main/code.sh https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/code.sh)
+    code_list=(https://raw.githubusercontents.com/Yun-City/City/main/config/code.sh https://raw.sevencdn.com/Yun-City/City/main/config/code.sh https://ghproxy.com/https://raw.githubusercontent.com/Yun-City/City/main/config/code.sh)
     for url in ${code_list[@]}; do
         check_url $url
         if [ $? = 0 ]; then
@@ -222,59 +256,9 @@ else
 fi
 
 
-
-
-# 获取有效 jdCookie.js 链接
-get_valid_task_jdCookie() {
-    task_jdCookie_list=(https://raw.githubusercontents.com/buqian123/Tasks/main/jdCookie.js https://raw.sevencdn.com/buqian123/Tasks/main/jdCookie.js https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/jdCookie.js)
-    for url in ${task_jdCookie_list[@]}; do
-        check_url $url
-        if [ $? = 0 ]; then
-            valid_url=$url
-            echo "使用链接 $url"
-            break
-        fi
-    done
-}
-
-
-
-
-# 下载 jdCookie.js
-dl_task_jdCookie_shell() {
-    if [ ! -a "$jdCookie_shell_path" ]; then
-        touch $jdCookie_shell_path
-    fi
-    curl -sL --connect-timeout 3 $valid_url > $jdCookie_shell_path
-    cp $jdCookie_shell_path $dir_config/jdCookie.js
-    # 判断是否下载成功
-    task_before_size=$(ls -l $jdCookie_shell_path | awk '{print $5}')
-    if (( $(echo "${task_before_size} < 100" | bc -l) )); then
-        echo "jdCookie.js 下载失败"
-        exit 0
-    fi
-}
-if [ "${RjdCookie}" = 'y' -o "${all}" = 1 ]; then
-    get_valid_task_jdCookie && dl_task_jdCookie_shell
-else
-    echo "已为您跳过下载 jdCookie.js"
-fi
-
-
-
-
-
-
-
-
-
-
-
-
-
 # 获取有效 task_before.sh 链接
 get_valid_task_before() {
-    task_before_list=(https://raw.githubusercontents.com/buqian123/Tasks/main/task_before.sh https://raw.sevencdn.com/buqian123/Tasks/main/task_before.sh https://ghproxy.com/https://raw.githubusercontent.com/buqian123/Tasks/main/task_before.sh)
+    task_before_list=(https://raw.githubusercontents.com/Yun-City/City/main/config/task_before.sh https://raw.sevencdn.com/Yun-City/City/main/config/task_before.sh https://ghproxy.com/https://raw.githubusercontent.com/Yun-City/City/main/config/task_before.sh)
     for url in ${task_before_list[@]}; do
         check_url $url
         if [ $? = 0 ]; then
@@ -359,7 +343,7 @@ add_curl_sample() {
         echo "开始添加 task:curl config.sample.sh"
         # 获取token
         token=$(cat /ql/config/auth.json | jq --raw-output .token)
-        curl -s -H 'Accept: application/json' -H "Authorization: Bearer $token" -H 'Content-Type: application/json;charset=UTF-8' -H 'Accept-Language: zh-CN,zh;q=0.9' --data-binary '{"name":"自动更新模板","command":"curl -L https://raw.githubusercontents.com/buqian123/Tasks/main/config.sample.sh -o /ql/sample/config.sample.sh && cp -rf /ql/sample/config.sample.sh /ql/config","schedule":"45 6,18 * * *"}' --compressed 'http://127.0.0.1:5700/api/crons?t=1627380635389'
+        curl -s -H 'Accept: application/json' -H "Authorization: Bearer $token" -H 'Content-Type: application/json;charset=UTF-8' -H 'Accept-Language: zh-CN,zh;q=0.9' --data-binary '{"name":"自动更新模板","command":"curl -L https://raw.githubusercontents.com/Yun-City/City/main/config/config.sample.sh -o /ql/sample/config.sample.sh && cp -rf /ql/sample/config.sample.sh /ql/config","schedule":"45 6,18 * * *"}' --compressed 'http://127.0.0.1:5700/api/crons?t=1627380635389'
     fi
 }
 run_curl_sample() {
