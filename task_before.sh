@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Build 20210822-001
+# Build 20211009-001-test
 
 name_js=(
   jd_fruit
@@ -79,7 +79,7 @@ var_name=(
   TokenJxnc                           ## 17、京喜Token(京喜财富岛提现用)
 )
 
-## 临时屏蔽某账号运行活动脚本
+## 临时屏蔽某账号运行活动脚本(账号序号匹配)
 TempBlock_JD_COOKIE(){
     source $file_env
     local TempBlockCookieInterval="$(echo $TempBlockCookie | perl -pe "{s|~|-|; s|_|-|}" | sed 's/\(\d\+\)-\(\d\+\)/{\1..\2}/g')"
@@ -92,6 +92,27 @@ TempBlock_JD_COOKIE(){
         n=$((m - 1))
         for ((t = 0; t < ${#TempBlockCookieArray[*]}; t++)); do
             [[ "${TempBlockCookieArray[t]}" = "$m" ]] && unset array[n]
+        done
+    done
+    jdCookie=$(echo ${array[*]} | sed 's/\ /\&/g')
+    [[ ! -z $jdCookie ]] && export JD_COOKIE="$jdCookie"
+    temp_user_sum=${#array[*]}
+}
+
+## 临时屏蔽某账号运行活动脚本(pt_pin匹配)
+TempBlock_JD_PT_PIN(){
+    [[ -z $JD_COOKIE ]] && source $file_env
+    local TempBlockPinArray=($TempBlockPin)
+    local envs=$(eval echo "\$JD_COOKIE")
+    local array=($(echo $envs | sed 's/&/ /g'))
+    local i m n t pt_pin_temp pt_pin_temp_block
+    for i in "${!array[@]}"; do
+        pt_pin_temp=$(echo ${array[i]} | perl -pe "{s|.*pt_pin=([^; ]+)(?=;?).*|\1|; s|%|\\\x|g}")
+        [[ $pt_pin_temp == *\\x* ]] && pt_pin[i]=$(printf $pt_pin_temp) || pt_pin[i]=$pt_pin_temp
+        for n in "${!TempBlockPinArray[@]}"; do
+            pt_pin_temp_block=$(echo ${TempBlockPinArray[n]} | perl -pe "{s|%|\\\x|g}")
+            [[ $pt_pin_temp_block == *\\x* ]] && pt_pin_block[n]=$(printf $pt_pin_temp_block) || pt_pin_block[n]=$pt_pin_temp_block
+            [[ "${pt_pin[i]}" =~ "${pt_pin_block[n]}" ]] && unset array[i]
         done
     done
     jdCookie=$(echo ${array[*]} | sed 's/\ /\&/g')
@@ -226,13 +247,18 @@ combine_all() {
 ## 正常依次运行时，组合互助码格式化为全局变量
 combine_only() {
     for ((i = 0; i < ${#env_name[*]}; i++)); do
-        case $first_param in
-            *${name_js[i]}.js | *${name_js[i]}.ts)
+        case $1 in
+            *${name_js[i]}*.js | *${name_js[i]}*.ts)
 	            if [[ -f $dir_log/.ShareCode/${name_config[i]}.log ]]; then
                     . $dir_log/.ShareCode/${name_config[i]}.log
                     result=$(combine_sub ${var_name[i]})
                     if [[ $result ]]; then
-                        export ${env_name[i]}=$result
+                        # 魔改说明：直接设置在ck超过45时，会导致env过大，部分系统命令无法执行，导致脚本执行失败
+                        #   这里改成设置一个标记，在nodejs中去实际设置环境变量
+                        # export ${env_name[i]}=$result
+                        export ShareCodeConfigName=${name_config[i]}
+                        export ShareCodeEnvName=${env_name[i]}
+                        echo "设置环境变量标记 ShareCodeConfigName=${ShareCodeConfigName} ShareCodeEnvName=${ShareCodeEnvName}, 供nodejs去实际生成互助码环境变量"
                     fi
                 fi
                 ;;
@@ -243,12 +269,12 @@ combine_only() {
     done
 }
 
-TempBlock_JD_COOKIE && Random_JD_COOKIE
+TempBlock_JD_COOKIE && TempBlock_JD_PT_PIN && Random_JD_COOKIE
 
 if [ $scr_name ]; then
     team_task
 else
-    combine_only
+	combine_only "$1"
 fi
 
 #if [[ $(ls $dir_code) ]]; then
@@ -257,3 +283,11 @@ fi
 #    combine_all
 #fi
 
+# 在实际执行任务前，确保集合仓库的脚本目录中的jdCookie.js是修改版的内容
+# 青龙v2.10.8及以后，由scripts功能自动覆盖
+#echo "请确保魔改版jdCookie.js已放置在/ql/scripts目录下，确保其会被自动覆盖 ..."
+
+# 青龙v2.10.8以前 启用这段代码
+# echo 开始复制魔改版jdCookie.js ...
+ cp /ql/config/jdCookie.js /ql/scripts/jdCookie.js
+# echo 复制完毕

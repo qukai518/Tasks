@@ -1,28 +1,23 @@
 #!/usr/bin/env bash
 
-## Build 20210821-001
+## Build 20211009-001
 
 ## 导入通用变量与函数
 dir_shell=/ql/shell
 . $dir_shell/share.sh
 
-dir_env_db=/$dir_db/env.db
-
-## 删除失效Cookie开关，默认是0，表示关闭；设置为1，表示开启
-DEL_COOKIE="0"
-
 ## 预设的仓库及默认调用仓库设置
 ## 将"repo=$repo1"改成repo=$repo2"或其他，以默认调用其他仓库脚本日志
-##也可自行搜索本脚本内的"name_js=("和"name_js_only",将"repo"改成"repo2"或其他，用以自由组合调用仓库的脚本日志
-repo1='Yun-City_City'                          #预设的 Yun-City_City仓库
+## 也可自行搜索本脚本内的"name_js=("和"name_js_only",将"repo"改成"repo2"或其他，用以自由组合调用仓库的脚本日志
+repo1='Yun-City_City'                       #预设的 city 仓库
 repo2='buqian123_faker3'                          #预设的 buqian123_faker3仓库
-repo=$repo1                                       #默认调用 buqian123_faker3 仓库脚本日志
+repo=$repo1                                        #默认调用 city 仓库脚本日志
 
 ## 调试模式开关，默认是0，表示关闭；设置为1，表示开启
 DEBUG="1"
 
 ## 本脚本限制的最大线程数量
-proc_num="17"
+proc_num="8"
 
 ## 备份配置文件开关，默认是1，表示开启；设置为0，表示关闭。备份路径 /ql/config/bak/
 BACKUP="1"
@@ -79,7 +74,7 @@ UpdateType="1"
 ## 定义是否自动安装或修复缺失的依赖，默认为1，表示自动修复；留空或其他数值表示不修复。
 FixDependType="1"
 ## 定义监控修复的依赖名称
-package_name="canvas png-js date-fns axios crypto-js ts-md5 tslib @types/node dotenv typescript fs require tslib"
+package_name="canvas png-js date-fns axios crypto-js ts-md5 tslib @types/node dotenv typescript fs require tslib jsdom"
 
 ## 需组合的环境变量列表，env_name需要和var_name一一对应，如何有新活动按照格式添加(不懂勿动)
 env_name=(
@@ -123,23 +118,22 @@ var_name=(
 ## 所有有互助码的活动，把脚本名称列在 name_js 中，对应 config.sh 中互助码后缀列在 name_config 中，中文名称列在 name_chinese 中。
 ## name_js、name_config 和 name_chinese 中的三个名称必须一一对应。
 name_js=(
-  "$repo"_jd_fruit
-  "$repo"_jd_pet
-  "$repo"_jd_plantBean
-  "$repo"_jd_dreamFactory
-  "$repo"_jd_jdfactory
-  "$repo"_jd_crazy_joy
-  "$repo"_jd_jdzz
-  "$repo"_jd_jxnc
-  "$repo"_jd_bookshop
-  "$repo"_jd_cash
-  "$repo"_jd_sgmh
-  "$repo"_jd_cfd
-  "$repo"_jd_health
-  "$repo"_jd_carnivalcity
-  "$repo"_jd_city
-  "$repo4"_jd_moneyTree_heip
-  "$repo"_jd_cfd
+  "$repo"_jd_fruit #农场
+  "$repo"_jd_pet   #萌宠
+  "$repo"_jd_plantBean #种豆
+  "$repo"_jd_dreamFactory #惊喜工厂
+  "$repo"_jd_jdfactory #惊喜工厂
+  "$repo"_jd_crazy_joy #无用
+  "$repo"_jd_jdzz #京东赚赚
+  "$repo"_jd_jxnc #惊喜牧场
+  "$repo"_jd_bookshop  #无用
+  "$repo"_jd_cash #签到领现金
+  "$repo"_jd_sgmh #闪购盲盒
+  "$repo"_jd_cfd #青蛙
+  "$repo"_jd_health  #东东健康社区
+  "$repo"_jd_carnivalcity #京东手机狂欢城
+  "$repo"_jd_city #无用
+  "$repo"_jd_moneyTree_heip #摇钱树
 )
 
 name_config=(
@@ -189,6 +183,7 @@ gen_pt_pin_array() {
   local tmp1 tmp2 i pt_pin_temp
   for i in "${!array[@]}"; do
     pt_pin_temp=$(echo ${array[i]} | perl -pe "{s|.*pt_pin=([^; ]+)(?=;?).*|\1|; s|%|\\\x|g}")
+    remark_name[i]=$(cat $dir_db/env.db | grep ${array[i]} | perl -pe "{s|.*remarks\":\"([^\"]+).*|\1|g}" | tail -1)
     [[ $pt_pin_temp == *\\x* ]] && pt_pin[i]=$(printf $pt_pin_temp) || pt_pin[i]=$pt_pin_temp
   done
 }
@@ -418,7 +413,7 @@ local i j k
 
 #更新配置文件中的互助码
 [[ ! -d $ShareCode_dir ]] && mkdir -p $ShareCode_dir
-[[ "$1" = "TokenJxnc" ]] && config_name_my=$1    
+[[ "$1" = "TokenJxnc" ]] && config_name_my=$1
 if [ ! -f $ShareCode_log ] || [ -z "$(cat $ShareCode_log | grep "^$config_name_my\d")" ]; then
    echo -e "\n## $chinese_name\n${config_name_my}1=''\n" >> $ShareCode_log
 fi
@@ -569,17 +564,13 @@ esac
 }
 
 check_jd_cookie(){
-[[ "$(curl -s --noproxy "*" "https://bean.m.jd.com/bean/signIndex.action" -H "cookie: $1")" ]] && echo "COOKIE 有效" || echo "COOKIE 已失效"
-}
-
-delete_old_cookie(){
-local ifold=$(curl -s --noproxy "*" "https://bean.m.jd.com/bean/signIndex.action" -H "cookie: $1")
-if [ ! "$ifold" ]; then
-  sed -i "s/$1/d" $dir_env_db
-  echo "COOKIE 失效，将被删除"
-else
-  echo "COOKIE 有效"
-fi
+    local test_connect="$(curl -I -s --connect-timeout 5 https://bean.m.jd.com/bean/signIndex.action -w %{http_code} | tail -n1)"
+    local test_jd_cookie="$(curl -s --noproxy "*" "https://bean.m.jd.com/bean/signIndex.action" -H "cookie: $1")"
+    if [ "$test_connect" -eq "302" ]; then
+        [[ "$test_jd_cookie" ]] && echo "(COOKIE 有效)" || echo "(COOKIE 已失效)"
+    else
+        echo "(API 连接失败)"
+    fi
 }
 
 dump_user_info(){
@@ -588,11 +579,7 @@ local envs=$(eval echo "\$JD_COOKIE")
 local array=($(echo $envs | sed 's/&/ /g'))
     for ((m = 0; m < ${#pt_pin[*]}; m++)); do
         j=$((m + 1))
-        if [[ $DEL_COOKIE = "1" ]]; then
-          echo -e "## 用户名 $j：${pt_pin[m]} (`delete_old_cookie ${array[m]}`)\nCookie$j=\"${array[m]}\""
-        else
-          echo -e "## 用户名 $j：${pt_pin[m]} (`check_jd_cookie ${array[m]}`)\nCookie$j=\"${array[m]}\""
-        fi
+        echo -e "## 用户名 $j：${pt_pin[m]} 备注：${remark_name[m]} `check_jd_cookie ${array[m]}`\nCookie$j=\"${array[m]}\""
     done
 }
 
@@ -682,7 +669,7 @@ install_dependencies_force(){
 install_dependencies_all(){
     install_dependencies_normal $package_name
     for i in $package_name; do
-        install_dependencies_force $i
+        {install_dependencies_force $i} &
     done
 }
 
