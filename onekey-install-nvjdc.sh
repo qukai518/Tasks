@@ -248,8 +248,10 @@ fi
 #判断机器是否安装docker
 if test -z "$(which docker)"; then
 echo -e "检测到系统未安装docker，开始安装docker"
-    curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun > /dev/null 2>&1 
-    curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+     bash <(curl -sSL https://raw.githubusercontents.com/buqian123/Tasks/main/DockerInstallation.sh)
+	  echo "安装 docker 环境...安装完成!"
+      systemctl enable docker
+      systemctl start docker
 fi
 
 #拉取nvjdc镜像
