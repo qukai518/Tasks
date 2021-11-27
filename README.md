@@ -14,13 +14,6 @@ wget -q  https://raw.githubusercontents.com/buqian123/Tasks/main/ql.sh -O ql.sh 
 ```
 
 
-【已安装青龙的用户一键配置代码 配置City仓库助力】
-
-```bash
-docker exec -it qinglong bash -c "$(curl -fsSL  https://raw.githubusercontents.com/buqian123/Tasks/main/1customCDN.sh)"
-```
-
-
 
 【NvJdc一键配置】
 
@@ -28,6 +21,11 @@ docker exec -it qinglong bash -c "$(curl -fsSL  https://raw.githubusercontents.c
 bash <(curl -sL  https://raw.githubusercontents.com/buqian123/Tasks/main/onekey-install-nvjdc.sh)
 ```
 
+【NvJdc1.5一键配置使用nolan仓库】
+
+```bash
+bash <(curl -sL  https://raw.githubusercontents.com/buqian123/Tasks/main/new-install-nvjdc.sh)
+```
 
 #### 说明
 
